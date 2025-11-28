@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 350px;
+      padding: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f7f7fa;
+    }
+    h1 {
+      font-size: 16px;
+      color: #fc5200;
+      margin: 0 0 15px 0;
+    }
+    #result {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+    #error {
+      color: #d32f2f;
+      padding: 10px;
+      display: none;
+    }
+    #loading {
+      color: #666;
+      padding: 10px;
+    }
+    #splits-loading {
+      color: #fc5200;
+      font-size: 12px;
+      padding: 8px 0;
+      display: none;
+    }
+    button {
+      background: #fc5200;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #e04a00;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏃 Strava Activity Exporter</h1>
+  <div id="loading">Extraction des données...</div>
+  <div id="error"></div>
+  <pre id="result"></pre>
+  <div id="splits-loading">⏳ Chargement des splits en cours...</div>
+  <button id="copy" style="display:none;">📋 Copier le JSON</button>
+  <script src="popup.js"></script>
+</body>
+</html>

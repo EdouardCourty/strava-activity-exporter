@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Strava Activity Exporter",
+    "description": "Nombre de la extensión"
+  },
+  "extDescription": {
+    "message": "Exporta los datos de tus actividades de Strava a JSON: duración, ritmo, calorías, frecuencia cardíaca, splits por km. Ideal para corredores y ciclistas.",
+    "description": "Descripción de la extensión"
+  }
+}
