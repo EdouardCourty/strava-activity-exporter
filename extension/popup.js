@@ -9,15 +9,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   let splitsInterval = null;
 
   function updateDisplay() {
-    // Forcer l'ordre des clés
+    // Force key order
     const ordered = {
-      titre: currentData.titre,
-      duree: currentData.duree,
-      duree_secondes: currentData.duree_secondes,
+      title: currentData.title,
+      duration: currentData.duration,
+      duration_seconds: currentData.duration_seconds,
       calories: currentData.calories,
-      allure: currentData.allure,
-      allure_secondes_par_km: currentData.allure_secondes_par_km,
-      cardio_moyen: currentData.cardio_moyen,
+      pace: currentData.pace,
+      pace_seconds_per_km: currentData.pace_seconds_per_km,
+      average_heart_rate: currentData.average_heart_rate,
       splits: currentData.splits
     };
     resultEl.textContent = JSON.stringify(ordered, null, 2);
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     if (!tab.url || !tab.url.includes('strava.com/activities/')) {
-      throw new Error('Veuillez ouvrir une page d\'activité Strava');
+      throw new Error('Please open a Strava activity page');
     }
 
     const results = await chrome.scripting.executeScript({
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateDisplay();
     copyBtn.style.display = 'block';
 
-    // Si pas de splits, afficher le message et polling
+    // If no splits, show message and poll
     if (!currentData.splits || currentData.splits.length === 0) {
       splitsLoadingEl.style.display = 'block';
       
@@ -66,15 +66,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             clearInterval(splitsInterval);
           }
         } catch (e) {
-          // Ignorer les erreurs de polling
+          // Ignore polling errors
         }
       }, 1000);
     }
 
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(JSON.stringify(currentData, null, 2));
-      copyBtn.textContent = '✓ Copié !';
-      setTimeout(() => copyBtn.textContent = '📋 Copier le JSON', 2000);
+      copyBtn.textContent = '✓ Copied!';
+      setTimeout(() => copyBtn.textContent = '📋 Copy JSON', 2000);
     });
 
   } catch (err) {
@@ -87,69 +87,69 @@ document.addEventListener('DOMContentLoaded', async () => {
 function extractStravaData() {
   try {
     const data = {
-      titre: null,
-      duree: null,
-      duree_secondes: null,
+      title: null,
+      duration: null,
+      duration_seconds: null,
       calories: null,
-      allure: null,
-      allure_secondes_par_km: null,
-      cardio_moyen: null,
+      pace: null,
+      pace_seconds_per_km: null,
+      average_heart_rate: null,
       splits: []
     };
 
-    // Extraire le titre
+    // Extract title
     const titleEl = document.querySelector('h1.activity-name, .activity-name');
     if (titleEl) {
-      data.titre = titleEl.textContent.trim();
+      data.title = titleEl.textContent.trim();
     }
 
-    // Chercher les données dans les scripts de la page
+    // Search for data in page scripts
     const scripts = document.querySelectorAll('script');
     for (const script of scripts) {
       const content = script.textContent;
 
-      // Chercher moving_time
+      // Search for moving_time
       const movingTimeMatch = content.match(/moving_time:\s*(\d+)/);
       if (movingTimeMatch) {
         const seconds = parseInt(movingTimeMatch[1]);
-        data.duree_secondes = seconds;
+        data.duration_seconds = seconds;
         const hours = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
         if (hours > 0) {
-          data.duree = `${hours}h ${mins}min ${secs}s`;
+          data.duration = `${hours}h ${mins}min ${secs}s`;
         } else {
-          data.duree = `${mins}min ${secs}s`;
+          data.duration = `${mins}min ${secs}s`;
         }
       }
 
-      // Chercher calories
+      // Search for calories
       const caloriesMatch = content.match(/calories:\s*([\d.]+)/);
       if (caloriesMatch) {
         data.calories = parseFloat(caloriesMatch[1]);
       }
 
-      // Chercher avg_speed (m/s pour la course)
+      // Search for avg_speed (m/s for running)
       const avgSpeedMatch = content.match(/avg_speed:\s*([\d.]+)/);
       if (avgSpeedMatch) {
         const speedMs = parseFloat(avgSpeedMatch[1]);
         if (speedMs > 0) {
           const paceSecondsPerKm = 1000 / speedMs;
-          data.allure_secondes_par_km = Math.round(paceSecondsPerKm);
+          data.pace_seconds_per_km = Math.round(paceSecondsPerKm);
           const paceMins = Math.floor(paceSecondsPerKm / 60);
           const paceSecs = Math.round(paceSecondsPerKm % 60);
-          data.allure = `${paceMins}:${paceSecs.toString().padStart(2, '0')} /km`;
+          data.pace = `${paceMins}:${paceSecs.toString().padStart(2, '0')} /km`;
         }
       }
 
-      // Chercher avg_hr (fréquence cardiaque moyenne)
+      // Search for avg_hr (average heart rate)
       const avgHrMatch = content.match(/avg_hr:\s*([\d.]+)/);
       if (avgHrMatch) {
-        data.cardio_moyen = Math.round(parseFloat(avgHrMatch[1]));
+        data.average_heart_rate = Math.round(parseFloat(avgHrMatch[1]));
       }
     }
 
-    // Extraire les splits par km depuis le tableau
+    // Extract splits per km from table
     const splitsTable = document.querySelector('#splits-container tbody#contents, .mile-splits tbody');
     if (splitsTable) {
       const rows = splitsTable.querySelectorAll('tr');
@@ -157,34 +157,34 @@ function extractStravaData() {
         const cells = row.querySelectorAll('td');
         if (cells.length >= 2) {
           const km = cells[0].textContent.trim().replace(',', '.');
-          const allureText = cells[1].textContent.trim();
-          const allureMatch = allureText.match(/([\d:]+)/);
+          const paceText = cells[1].textContent.trim();
+          const paceMatch = paceText.match(/([\d:]+)/);
           const elevText = cells[2] ? cells[2].textContent.trim() : null;
           const elevMatch = elevText ? elevText.match(/(-?\d+)/) : null;
           
-          if (allureMatch) {
+          if (paceMatch) {
             data.splits.push({
               km: parseFloat(km) || km,
-              allure: allureMatch[1] + '/km',
-              denivele: elevMatch ? parseInt(elevMatch[1]) : null
+              pace: paceMatch[1] + '/km',
+              elevation: elevMatch ? parseInt(elevMatch[1]) : null
             });
           }
         }
       });
     }
 
-    // Fallback: chercher dans le DOM si les scripts ne contiennent pas les données
-    if (!data.duree) {
+    // Fallback: search in DOM if scripts don't contain data
+    if (!data.duration) {
       const timeEl = document.querySelector('[data-glossary-term="moving_time"] .stat-text, .moving-time .stat-text');
       if (timeEl) {
-        data.duree = timeEl.textContent.trim();
+        data.duration = timeEl.textContent.trim();
       }
     }
 
     return data;
 
   } catch (err) {
-    return { error: 'Erreur lors de l\'extraction: ' + err.message };
+    return { error: 'Extraction error: ' + err.message };
   }
 }
 
@@ -197,16 +197,16 @@ function extractSplitsOnly() {
       const cells = row.querySelectorAll('td');
       if (cells.length >= 2) {
         const km = cells[0].textContent.trim().replace(',', '.');
-        const allureText = cells[1].textContent.trim();
-        const allureMatch = allureText.match(/([\d:]+)/);
+        const paceText = cells[1].textContent.trim();
+        const paceMatch = paceText.match(/([\d:]+)/);
         const elevText = cells[2] ? cells[2].textContent.trim() : null;
         const elevMatch = elevText ? elevText.match(/(-?\d+)/) : null;
         
-        if (allureMatch) {
+        if (paceMatch) {
           splits.push({
             km: parseFloat(km) || km,
-            allure: allureMatch[1] + '/km',
-            denivele: elevMatch ? parseInt(elevMatch[1]) : null
+            pace: paceMatch[1] + '/km',
+            elevation: elevMatch ? parseInt(elevMatch[1]) : null
           });
         }
       }

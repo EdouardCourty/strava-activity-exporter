@@ -36,20 +36,26 @@ Automatically extracts from any Strava activity page:
 
 ```json
 {
-  "titre": "Morning run 🌅",
-  "duree": "44min 7s",
-  "duree_secondes": 2647,
+  "title": "Morning run 🌅",
+  "duration": "44min 7s",
+  "duration_seconds": 2647,
   "calories": 500,
-  "allure": "6:03 /km",
-  "allure_secondes_par_km": 363,
-  "cardio_moyen": 152,
+  "pace": "6:03 /km",
+  "pace_seconds_per_km": 363,
+  "average_heart_rate": 152,
   "splits": [
-    { "km": 1, "allure": "5:26/km", "denivele": 3 },
-    { "km": 2, "allure": "6:40/km", "denivele": 6 },
-    { "km": 3, "allure": "5:39/km", "denivele": 5 }
+    { "km": 1, "pace": "5:26/km", "elevation": 3 },
+    { "km": 2, "pace": "6:40/km", "elevation": 6 },
+    { "km": 3, "pace": "5:39/km", "elevation": 5 }
   ]
 }
 ```
+
+## Demonstration
+
+![Extension popup](screenshot.png)
+
+![Full export view](screenshot_full.png)
 
 ## License
 
